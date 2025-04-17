@@ -1,0 +1,22 @@
+#!/bin/bash
+echo "Git Interactive Shell - Digita 'exit' per uscire"
+echo "Comandi supportati: status, pull, push, add, commit, log, branch, checkout, ecc."
+
+while true; do
+    read -p ">>> " cmd args
+    
+    case $cmd in
+        exit|quit)
+            break
+            ;;
+        help)
+            echo "Comandi Git disponibili: status, pull, push, add, commit, log, branch, checkout"
+            echo "Comandi shell: exit, quit, help"
+            ;;
+        *)
+            if [[ -n $cmd ]]; then
+                git $cmd $args
+            fi
+            ;;
+    esac
+done
