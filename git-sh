@@ -1,12 +1,45 @@
 #!/bin/bash
+# git autocompletion
+if [ -f /usr/share/bash-completion/completions/git ]; then
+    source /usr/share/bash-completion/completions/git
+elif [ -f /etc/bash_completion.d/git ]; then
+    source /etc/bash_completion.d/git
+else
+    echo "WARNING: git autocompletion not available."
+    sleep 1
+fi
+
+# __git_main override
+__git_sh_main() {
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    
+    # Se siamo al primo livello, mostra solo i comandi principali
+    if [ $COMP_CWORD -eq 1 ]; then
+        opts="status pull push add commit log branch checkout diff fetch merge rebase reset tag show clone init help exit quit"
+        COMPREPLY=($(compgen -W "${opts}" -- "${cur}"))
+    else
+        # Altrimenti usa il completamento nativo di Git
+        __git_wrap__git_main
+    fi
+}
+
 echo "Git Interactive Shell - Digita 'exit' per uscire"
 echo "Comandi supportati: status, pull, push, add, commit, log, branch, checkout, ecc."
 
+HISTFILE=~/.git_sh_history
+HISTSIZE=500
+HISTFILESIZE=500
+history -r
+
 while true; do
-    read -p ">>> " cmd args
+    read -e -p ">>> " cmd args
     
     case $cmd in
         exit|quit)
+	    history -w
             break
             ;;
         help)
@@ -20,3 +53,5 @@ while true; do
             ;;
     esac
 done
+
+complete -o bashdefault -o default -F __git_sh_main git-sh
